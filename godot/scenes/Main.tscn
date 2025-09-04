@@ -1,0 +1,34 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/Main.gd" id="1_g3x4s"]
+[ext_resource type="Script" path="res://scripts/map/MapView.gd" id="2_7u52y"]
+
+[node name="Main" type="Node2D"]
+script = ExtResource("1_g3x4s")
+
+[node name="MapView" type="Node2D" parent="."]
+script = ExtResource("2_7u52y")
+
+[node name="Terrain" type="TileMap" parent="MapView"]
+
+[node name="Cities" type="TileMap" parent="MapView"]
+
+[node name="FoW" type="TileMap" parent="MapView"]
+
+[node name="Camera2D" type="Camera2D" parent="."]
+current = true
+
+[node name="CanvasLayer" type="CanvasLayer" parent="."]
+
+[node name="HUD" type="Control" parent="CanvasLayer"]
+anchor_right = 1.0
+
+[node name="Label" type="Label" parent="CanvasLayer/HUD"]
+text = "Map: --  Cities: --"
+anchors_preset = 1
+anchor_left = 0.0
+anchor_top = 0.0
+anchor_right = 0.0
+anchor_bottom = 0.0
+offset_left = 12.0
+offset_top = 12.0

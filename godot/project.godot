@@ -1,0 +1,14 @@
+; Engine configuration file for Godot 4.x
+; Prefer editing via the editor, but this is a minimal starter.
+
+config_version=5
+
+[application]
+config/name="Modern Warfare Empire Earth"
+run/main_scene="res://scenes/Main.tscn"
+
+[autoload]
+TurnManager="*res://autoload/TurnManager.gd"
+
+[rendering]
+quality/driver/driver_name="Vulkan"
