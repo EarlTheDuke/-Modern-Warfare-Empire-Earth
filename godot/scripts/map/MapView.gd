@@ -1,7 +1,7 @@
 extends Node2D
 class_name MapView
 
-@export var tile_size: int = 32
+@export var tile_size: int = 16
 
 @onready var terrain: TileMap = $Terrain
 @onready var cities: TileMap = $Cities
@@ -47,7 +47,7 @@ func render_map(gm, active_player: String = "") -> void:
 				elif not gm.visible[active_player][y][x]:
 					fow.set_cell(0, Vector2i(x, y), source_id, atlas_fog)
 	print("[MapView] rendered tiles: ", gm.width, "x", gm.height, " cities=", gm.cities.size(), " active=", active_player)
-	update()
+	queue_redraw()
 
 func _draw() -> void:
 	# Visual sanity check: draw a semi-transparent green square at top-left
@@ -55,20 +55,21 @@ func _draw() -> void:
 
 func _build_runtime_tileset() -> TileSet:
 	var ts := TileSet.new()
-	var img := Image.create(4 * 16, 16, false, Image.FORMAT_RGBA8)
+	ts.tile_size = Vector2i(tile_size, tile_size)
+	var img := Image.create(4 * tile_size, tile_size, false, Image.FORMAT_RGBA8)
 	img.fill(Color(0, 0, 0, 0))
 	# Ocean (blue)
-	img.fill_rect(Rect2i(16, 0, 16, 16), Color(0.1, 0.3, 0.8, 1.0))
+	img.fill_rect(Rect2i(tile_size, 0, tile_size, tile_size), Color(0.1, 0.3, 0.8, 1.0))
 	# Land (green)
-	img.fill_rect(Rect2i(0, 0, 16, 16), Color(0.1, 0.6, 0.2, 1.0))
+	img.fill_rect(Rect2i(0, 0, tile_size, tile_size), Color(0.1, 0.6, 0.2, 1.0))
 	# City (yellow)
-	img.fill_rect(Rect2i(32, 0, 16, 16), Color(0.9, 0.8, 0.2, 1.0))
+	img.fill_rect(Rect2i(2 * tile_size, 0, tile_size, tile_size), Color(0.9, 0.8, 0.2, 1.0))
 	# Fog (black transparent)
-	img.fill_rect(Rect2i(48, 0, 16, 16), Color(0, 0, 0, 0.5))
+	img.fill_rect(Rect2i(3 * tile_size, 0, tile_size, tile_size), Color(0, 0, 0, 0.5))
 	var tex := ImageTexture.create_from_image(img)
 	var src := TileSetAtlasSource.new()
 	src.texture = tex
-	src.texture_region_size = Vector2i(16, 16)
+	src.texture_region_size = Vector2i(tile_size, tile_size)
 	source_id = ts.add_source(src)
 	# Map atlas coords: (0,0)=land, (1,0)=ocean, (2,0)=city, (3,0)=fog
 	return ts
