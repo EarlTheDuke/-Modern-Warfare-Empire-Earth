@@ -13,6 +13,7 @@ var atlas_land := Vector2i(0, 0)
 var atlas_ocean := Vector2i(1, 0)
 var atlas_city := Vector2i(2, 0)
 var atlas_fog := Vector2i(3, 0)
+var _last_gm = null
 
 func _ready() -> void:
 	tileset = _build_runtime_tileset()
@@ -26,6 +27,7 @@ func render_map(gm, active_player: String = "") -> void:
 	cities.clear()
 	fow.clear()
 	print("[MapView] render_map called")
+	_last_gm = gm
 	# Fill terrain
 	for y in range(gm.height):
 		for x in range(gm.width):
@@ -53,6 +55,15 @@ func render_map(gm, active_player: String = "") -> void:
 func _draw() -> void:
 	# Visual sanity check: draw a semi-transparent green square at top-left
 	draw_rect(Rect2(Vector2.ZERO, Vector2(64, 64)), Color(0.1, 0.8, 0.2, 0.4), true)
+	# Debug fallback: draw first 60x40 tiles directly so we can see terrain
+	if _last_gm != null:
+		var max_y := min(_last_gm.height, 40)
+		var max_x := min(_last_gm.width, 60)
+		for y in range(max_y):
+			for x in range(max_x):
+				var ch: String = _last_gm.tiles[y][x]
+				var col := (ch == "+") ? Color(0.1, 0.6, 0.2, 1.0) : Color(0.1, 0.3, 0.8, 1.0)
+				draw_rect(Rect2(Vector2(x * tile_size, y * tile_size), Vector2(tile_size, tile_size)), col, true)
 
 func _build_runtime_tileset() -> TileSet:
 	var ts := TileSet.new()

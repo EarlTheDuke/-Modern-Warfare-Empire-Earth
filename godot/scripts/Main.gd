@@ -77,6 +77,8 @@ func _on_generate_pressed() -> void:
 	active_player_view = ""
 	fow_mode.selected = 0
 	_generate_and_render()
+	# Force trigger MapView draw in case TileMap batching delays visuals
+	map_view.queue_redraw()
 
 func _on_fow_mode_selected(index: int) -> void:
 	match index:
