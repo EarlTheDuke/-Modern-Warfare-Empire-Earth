@@ -1,6 +1,6 @@
 extends Node2D
 
-@onready var map_view: MapView = $MapView
+@onready var map_view = $MapView
 @onready var cam: Camera2D = $Camera2D
 @onready var hud_label: Label = $CanvasLayer/HUD/Label
 @onready var fow_mode: OptionButton = $CanvasLayer/HUD/HBox/FoWMode
@@ -25,11 +25,11 @@ func _ready() -> void:
 	fow_mode.selected = 0
 	fow_mode.item_selected.connect(_on_fow_mode_selected)
 	btn_generate.pressed.connect(_on_generate_pressed)
-	# Camera limits
-	cam.limit_left = 0
-	cam.limit_top = 0
-	cam.limit_right = w * map_view.tile_size
-	cam.limit_bottom = h * map_view.tile_size
+	# Camera limits: loosen to allow panning at any zoom
+	cam.limit_left = -100000
+	cam.limit_top = -100000
+	cam.limit_right = 100000
+	cam.limit_bottom = 100000
 	cam.make_current()
 
 func _generate_and_render() -> void:
@@ -61,6 +61,9 @@ func _unhandled_input(event: InputEvent) -> void:
 		if mb.button_index == MOUSE_BUTTON_MIDDLE:
 			dragging = mb.pressed
 			last_mouse = mb.position
+		elif mb.button_index == MOUSE_BUTTON_RIGHT:
+			dragging = mb.pressed
+			last_mouse = mb.position
 		elif mb.button_index == MOUSE_BUTTON_WHEEL_UP and mb.pressed:
 			cam.zoom *= Vector2(0.9, 0.9)
 		elif mb.button_index == MOUSE_BUTTON_WHEEL_DOWN and mb.pressed:
@@ -70,6 +73,20 @@ func _unhandled_input(event: InputEvent) -> void:
 		var delta := (mm.position - last_mouse) * cam.zoom
 		cam.position -= delta
 		last_mouse = mm.position
+	elif event is InputEventKey and event.pressed:
+		var step := 32.0
+		var ie := event as InputEventKey
+		match ie.keycode:
+			KEY_A, KEY_LEFT:
+				cam.position.x -= step
+			KEY_D, KEY_RIGHT:
+				cam.position.x += step
+			KEY_W, KEY_UP:
+				cam.position.y -= step
+			KEY_S, KEY_DOWN:
+				cam.position.y += step
+			KEY_R:
+				_on_generate_pressed()
 
 func _on_generate_pressed() -> void:
 	print("[UI] Generate Map clicked")
