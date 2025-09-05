@@ -75,7 +75,11 @@ func _draw() -> void:
 		# Units as small squares; highlight selected
 		for i in range(_units.size()):
 			var u = _units[i]
-			var ucol: Color = (u.owner == "P1") ? Color(0.95,0.95,0.2,1.0) : Color(0.9,0.2,0.2,1.0)
+			var ucol: Color
+			if u.owner == "P1":
+				ucol = Color(0.95, 0.95, 0.2, 1.0)
+			else:
+				ucol = Color(0.9, 0.2, 0.2, 1.0)
 			draw_rect(Rect2(Vector2(u.x * tile_size + 3, u.y * tile_size + 3), Vector2(tile_size - 6, tile_size - 6)), ucol, true)
 			if i == _selected_index:
 				draw_rect(Rect2(Vector2(u.x * tile_size + 1, u.y * tile_size + 1), Vector2(tile_size - 2, tile_size - 2)), Color(1,1,1,0.8), false)
