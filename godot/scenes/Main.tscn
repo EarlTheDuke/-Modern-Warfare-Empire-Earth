@@ -46,4 +46,3 @@ size_flags_horizontal = 0
 [node name="BtnGenerate" type="Button" parent="CanvasLayer/HUD/HBox"]
 layout_mode = 2
 text = "Generate Map"
-toggle_mode = false

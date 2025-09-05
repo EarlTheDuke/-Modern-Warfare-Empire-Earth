@@ -1,14 +1,27 @@
-; Engine configuration file for Godot 4.x
-; Prefer editing via the editor, but this is a minimal starter.
+; Engine configuration file.
+; It's best edited using the editor UI and not directly,
+; since the parameters that go here are not all obvious.
+;
+; Format:
+;   [section] ; section goes between []
+;   param=value ; assign values to parameters
 
 config_version=5
 
 [application]
+
 config/name="Modern Warfare Empire Earth"
-run/main_scene="res://scenes/Main.tscn"
+run/main_scene="res://scenes/TestSimple.tscn"
+config/features=PackedStringArray("4.4")
 
 [autoload]
+
 TurnManager="*res://autoload/TurnManager.gd"
 
+[dotnet]
+
+project/assembly_name="Modern Warfare Empire Earth"
+
 [rendering]
+
 quality/driver/driver_name="Vulkan"

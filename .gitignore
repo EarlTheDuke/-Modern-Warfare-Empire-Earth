@@ -71,3 +71,7 @@ Thumbs.db
 # Saved games (keep local saves out of git)
 saved games/*.json
 *.json
+ 
+# Godot project files (auto-generated)
+godot/.godot/
+godot/**/*.uid

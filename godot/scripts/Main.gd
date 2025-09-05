@@ -107,7 +107,8 @@ func _on_generate_pressed() -> void:
 	map_view.queue_redraw()
 
 func _handle_click(pos: Vector2) -> void:
-	var view_pos := pos + (cam.position - get_viewport_rect().size * 0.5) * Vector2(1,1)
+	# Convert screen coords to world using Camera2D API (handles zoom/offset)
+	var view_pos: Vector2 = cam.screen_to_world(pos)
 	var tile_x := int(floor(view_pos.x / float(map_view.tile_size)))
 	var tile_y := int(floor(view_pos.y / float(map_view.tile_size)))
 	if tile_x < 0 or tile_y < 0 or tile_x >= game_map.width or tile_y >= game_map.height:
@@ -116,6 +117,7 @@ func _handle_click(pos: Vector2) -> void:
 	var clicked := _unit_index_at(tile_x, tile_y)
 	if clicked != -1:
 		selected_index = clicked
+		map_view.render_map(game_map, active_player_view, units, selected_index)
 		return
 	if selected_index != -1:
 		var u = units[selected_index]
@@ -123,7 +125,7 @@ func _handle_click(pos: Vector2) -> void:
 			u.x = tile_x
 			u.y = tile_y
 			u.moves_left -= 1
-			map_view.queue_redraw()
+			map_view.render_map(game_map, active_player_view, units, selected_index)
 
 func _unit_index_at(tx: int, ty: int) -> int:
 	for i in range(units.size()):
@@ -132,18 +134,34 @@ func _unit_index_at(tx: int, ty: int) -> int:
 			return i
 	return -1
 
+
 func _spawn_initial_units() -> void:
 	var p1 := "P1"
 	var p2 := "P2"
-	var u1 := UnitData.new(1, 1, p1)
-	var u2 := UnitData.new(3, 1, p2)
+	var u1_pos := _find_first_land(1, 1)
+	var u2_pos := _find_first_land(3, 1)
+	var u1 := UnitData.new(u1_pos.x, u1_pos.y, p1)
+	var u2 := UnitData.new(u2_pos.x, u2_pos.y, p2)
 	un1_reset(u1)
 	un1_reset(u2)
 	units.append(u1)
 	units.append(u2)
+	selected_index = 0
+	map_view.render_map(game_map, active_player_view, units, selected_index)
 
 func un1_reset(u) -> void:
 	u.reset_moves()
+
+func _find_first_land(start_x: int, start_y: int) -> Vector2i:
+	for radius in range(0, 10):
+		for dy in range(-radius, radius + 1):
+			for dx in range(-radius, radius + 1):
+				var x := start_x + dx
+				var y := start_y + dy
+				if x >= 0 and y >= 0 and x < game_map.width and y < game_map.height:
+					if game_map.tiles[y][x] == "+":
+						return Vector2i(x, y)
+	return Vector2i(clamp(start_x, 0, game_map.width - 1), clamp(start_y, 0, game_map.height - 1))
 
 func _on_fow_mode_selected(index: int) -> void:
 	match index:
