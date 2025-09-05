@@ -93,6 +93,27 @@ func _unhandled_input(event: InputEvent) -> void:
 				cam.position.y += step
 			KEY_R:
 				_on_generate_pressed()
+			KEY_N:
+				if units.size() > 0:
+					selected_index = (selected_index + 1) % units.size()
+					map_view.render_map(game_map, active_player_view, units, selected_index)
+			# Numpad movement for selected unit (8/2/4/6 and diagonals 7/9/1/3)
+			KEY_KP_8:
+				_try_move_selected(0, -1)
+			KEY_KP_2:
+				_try_move_selected(0, 1)
+			KEY_KP_4:
+				_try_move_selected(-1, 0)
+			KEY_KP_6:
+				_try_move_selected(1, 0)
+			KEY_KP_7:
+				_try_move_selected(-1, -1)
+			KEY_KP_9:
+				_try_move_selected(1, -1)
+			KEY_KP_1:
+				_try_move_selected(-1, 1)
+			KEY_KP_3:
+				_try_move_selected(1, 1)
 	elif event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT:
 		var mb2 := event as InputEventMouseButton
 		_handle_click(mb2.position)
@@ -126,6 +147,26 @@ func _handle_click(pos: Vector2) -> void:
 			u.y = tile_y
 			u.moves_left -= 1
 			map_view.render_map(game_map, active_player_view, units, selected_index)
+
+func _try_move_selected(dx: int, dy: int) -> void:
+	if selected_index < 0 or selected_index >= units.size():
+		return
+	var u = units[selected_index]
+	if not u.can_move():
+		return
+	var nx := u.x + dx
+	var ny := u.y + dy
+	if nx < 0 or ny < 0 or nx >= game_map.width or ny >= game_map.height:
+		return
+	if game_map.tiles[ny][nx] != "+":
+		return
+	# Prevent stepping onto another unit for now
+	if _unit_index_at(nx, ny) != -1:
+		return
+	u.x = nx
+	u.y = ny
+	u.moves_left -= 1
+	map_view.render_map(game_map, active_player_view, units, selected_index)
 
 func _unit_index_at(tx: int, ty: int) -> int:
 	for i in range(units.size()):
