@@ -18,10 +18,10 @@ func _ready() -> void:
 	tileset = _build_runtime_tileset()
 	for tm in [terrain, cities, fow]:
 		tm.tile_set = tileset
-		tm.tile_set.tile_size = Vector2i(tile_size, tile_size)
 		tm.rendering_quadrant_size = 16
+	print("[MapView] ready; tileset source=", source_id)
 
-func render_map(gm: GameMap, active_player: String = "") -> void:
+func render_map(gm, active_player: String = "") -> void:
 	terrain.clear()
 	cities.clear()
 	fow.clear()
@@ -29,8 +29,10 @@ func render_map(gm: GameMap, active_player: String = "") -> void:
 	for y in range(gm.height):
 		for x in range(gm.width):
 			var ch: String = gm.tiles[y][x]
-			var coord := atlas_land if ch == GameMap.LAND else atlas_ocean
+			var coord := atlas_land if ch == "+" else atlas_ocean
 			terrain.set_cell(0, Vector2i(x, y), source_id, coord)
+	# Simple sanity tile
+	terrain.set_cell(0, Vector2i(0, 0), source_id, atlas_land)
 	# Cities
 	for c in gm.cities:
 		var cx: int = c["x"]
@@ -44,6 +46,12 @@ func render_map(gm: GameMap, active_player: String = "") -> void:
 					fow.set_cell(0, Vector2i(x, y), source_id, atlas_fog)
 				elif not gm.visible[active_player][y][x]:
 					fow.set_cell(0, Vector2i(x, y), source_id, atlas_fog)
+	print("[MapView] rendered tiles: ", gm.width, "x", gm.height, " cities=", gm.cities.size(), " active=", active_player)
+	update()
+
+func _draw() -> void:
+	# Visual sanity check: draw a semi-transparent green square at top-left
+	draw_rect(Rect2(Vector2.ZERO, Vector2(64, 64)), Color(0.1, 0.8, 0.2, 0.4), true)
 
 func _build_runtime_tileset() -> TileSet:
 	var ts := TileSet.new()
