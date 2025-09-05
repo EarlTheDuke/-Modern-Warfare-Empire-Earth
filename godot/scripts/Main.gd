@@ -11,6 +11,7 @@ var active_player_view: String = ""
 var generation_count: int = 0
 
 func _ready() -> void:
+	print("[Main] ready")
 	# Build a map similar to Python MVP
 	var w := 120
 	var h := 48

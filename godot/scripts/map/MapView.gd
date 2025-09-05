@@ -25,6 +25,7 @@ func render_map(gm, active_player: String = "") -> void:
 	terrain.clear()
 	cities.clear()
 	fow.clear()
+	print("[MapView] render_map called")
 	# Fill terrain
 	for y in range(gm.height):
 		for x in range(gm.width):

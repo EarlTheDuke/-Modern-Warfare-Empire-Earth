@@ -1,7 +1,7 @@
-[gd_scene load_steps=3 format=3]
+[gd_scene load_steps=3 format=3 uid="uid://c3nw8lgqc7w03"]
 
-[ext_resource type="Script" path="res://scripts/Main.gd" id="1_g3x4s"]
-[ext_resource type="Script" path="res://scripts/map/MapView.gd" id="2_7u52y"]
+[ext_resource type="Script" uid="uid://c282igqryks4c" path="res://scripts/Main.gd" id="1_g3x4s"]
+[ext_resource type="Script" uid="uid://b0fohuarfkwya" path="res://scripts/map/MapView.gd" id="2_7u52y"]
 
 [node name="Main" type="Node2D"]
 script = ExtResource("1_g3x4s")
@@ -10,25 +10,40 @@ script = ExtResource("1_g3x4s")
 script = ExtResource("2_7u52y")
 
 [node name="Terrain" type="TileMap" parent="MapView"]
+format = 2
 
 [node name="Cities" type="TileMap" parent="MapView"]
+format = 2
 
 [node name="FoW" type="TileMap" parent="MapView"]
+format = 2
 
 [node name="Camera2D" type="Camera2D" parent="."]
-current = true
 
 [node name="CanvasLayer" type="CanvasLayer" parent="."]
 
 [node name="HUD" type="Control" parent="CanvasLayer"]
+layout_mode = 3
+anchors_preset = 10
 anchor_right = 1.0
+grow_horizontal = 2
 
 [node name="Label" type="Label" parent="CanvasLayer/HUD"]
-text = "Map: --  Cities: --"
-anchors_preset = 1
-anchor_left = 0.0
-anchor_top = 0.0
-anchor_right = 0.0
-anchor_bottom = 0.0
+layout_mode = 0
 offset_left = 12.0
 offset_top = 12.0
+text = "Map: --  Cities: --"
+
+[node name="HBox" type="HBoxContainer" parent="CanvasLayer/HUD"]
+layout_mode = 0
+offset_left = 12.0
+offset_top = 40.0
+
+[node name="FoWMode" type="OptionButton" parent="CanvasLayer/HUD/HBox"]
+layout_mode = 2
+size_flags_horizontal = 0
+
+[node name="BtnGenerate" type="Button" parent="CanvasLayer/HUD/HBox"]
+layout_mode = 2
+text = "Generate Map"
+toggle_mode = false
