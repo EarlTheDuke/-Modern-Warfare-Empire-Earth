@@ -3,6 +3,8 @@ extends Node2D
 @onready var map_view = $MapView
 @onready var cam: Camera2D = $Camera2D
 @onready var hud_label: Label = $CanvasLayer/HUD/Label
+@onready var hud_details: Label = $CanvasLayer/HUD/Details
+@onready var hud_reports: Label = $CanvasLayer/HUD/Reports
 @onready var fow_mode: OptionButton = $CanvasLayer/HUD/HBox/FoWMode
 @onready var btn_generate: Button = $CanvasLayer/HUD/HBox/BtnNewGame
 @onready var btn_end_turn: Button = $CanvasLayer/HUD/HBox/BtnEndTurn
@@ -44,6 +46,22 @@ func _generate_and_render() -> void:
 func _update_hud() -> void:
 	var num_cities = gs.game_map.cities.size()
 	hud_label.text = "Map: %dx%d  Cities: %d  Turn: %d  Player: %s" % [gs.game_map.width, gs.game_map.height, num_cities, gs.turn_number, gs.current_player]
+	var det := ""
+	if gs.selected_index != -1:
+		var u = gs.units[gs.selected_index]
+		det = "%s @(%d,%d) hp:%d/%d mp:%d" % [u.owner, u.x, u.y, u.hp, u.max_hp, u.moves_left]
+		for c in gs.game_map.cities:
+			if c["x"] == u.x and c["y"] == u.y and c["owner"] == gs.current_player:
+				var eta := 0
+				var cost := int(c.get("production_cost", 0))
+				var prog := int(c.get("production_progress", 0))
+				if cost > 0:
+					eta = max(0, cost - prog)
+				det += " | City: %s ETA %d" % [str(c.get("production_type", "")), eta]
+				break
+	hud_details.text = det
+	var lines := gs.get_recent_reports(5)
+	hud_reports.text = "\n".join(lines)
 
 func _center_camera_on_map() -> void:
 	if gs == null or gs.game_map == null:

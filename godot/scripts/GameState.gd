@@ -18,6 +18,11 @@ var selected_index: int = -1
 # Fog-of-war toggle for HUD ("", "P1", "P2")
 var active_player_view: String = ""
 
+# Session stats and battle reports
+var game_stats := {} # player -> {"kills": {type:int}, "losses": {type:int}}
+var battle_reports: Array[String] = []
+var max_reports: int = 12
+
 func _ready() -> void:
     rng.randomize()
 
@@ -30,6 +35,8 @@ func new_game(width: int, height: int) -> void:
     turn_number = 1
     units.clear()
     selected_index = -1
+    _init_stats()
+    battle_reports.clear()
     _spawn_initial_units()
     recompute_fow_for(current_player)
 
@@ -170,6 +177,9 @@ func try_move_unit(u: UnitBase, dx: int, dy: int) -> bool:
         if not defender_alive:
             # remove defender (mark dead) and move in if attacker alive
             v.hp = 0
+            _record_kill(u.owner, v)
+            _record_loss(v.owner, v)
+            _add_report("%s %s vs %s %s @(%d,%d) -> kill" % [u.owner, _ut(u), v.owner, _ut(v), nx, ny])
             if attacker_alive:
                 u.x = nx
                 u.y = ny
@@ -180,6 +190,9 @@ func try_move_unit(u: UnitBase, dx: int, dy: int) -> bool:
         else:
             if not attacker_alive:
                 u.hp = 0
+                _record_loss(u.owner, u)
+                _record_kill(v.owner, u)
+            _add_report("%s %s vs %s %s @(%d,%d) -> clash" % [u.owner, _ut(u), v.owner, _ut(v), nx, ny])
             recompute_fow_for(current_player)
             return true
     # Move into empty tile; handle city capture on arrival
@@ -268,6 +281,39 @@ func recompute_fow_for(owner: String) -> void:
         if u.owner == owner and u.is_alive():
             game_map.mark_visible_circle(owner, u.x, u.y, 3)
 
+
+func _init_stats() -> void:
+    game_stats.clear()
+    for p in players:
+        game_stats[p] = {
+            "kills": {"Army": 0, "Fighter": 0, "Carrier": 0, "NuclearMissile": 0},
+            "losses": {"Army": 0, "Fighter": 0, "Carrier": 0, "NuclearMissile": 0},
+        }
+
+func _ut(u: UnitBase) -> String:
+    return u.get_class()
+
+func _record_kill(owner: String, victim: UnitBase) -> void:
+    var vt := _ut(victim)
+    if game_stats.has(owner) and game_stats[owner]["kills"].has(vt):
+        game_stats[owner]["kills"][vt] += 1
+
+func _record_loss(owner: String, unit: UnitBase) -> void:
+    var ut := _ut(unit)
+    if game_stats.has(owner) and game_stats[owner]["losses"].has(ut):
+        game_stats[owner]["losses"][ut] += 1
+
+func _add_report(line: String) -> void:
+    battle_reports.append(line)
+    if battle_reports.size() > max_reports:
+        var excess := battle_reports.size() - max_reports
+        battle_reports = battle_reports.slice(excess, battle_reports.size())
+
+func get_recent_reports(n: int = 8) -> Array[String]:
+    var k := clampi(n, 0, max_reports)
+    if battle_reports.size() <= k:
+        return battle_reports.duplicate()
+    return battle_reports.slice(battle_reports.size() - k, battle_reports.size())
 
 func _advance_production_and_spawn() -> void:
     for c in game_map.cities:

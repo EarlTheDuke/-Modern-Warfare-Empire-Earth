@@ -34,6 +34,18 @@ offset_left = 12.0
 offset_top = 12.0
 text = "Map: --  Cities: --"
 
+[node name="Details" type="Label" parent="CanvasLayer/HUD"]
+layout_mode = 0
+offset_left = 12.0
+offset_top = 64.0
+text = ""
+
+[node name="Reports" type="Label" parent="CanvasLayer/HUD"]
+layout_mode = 0
+offset_left = 12.0
+offset_top = 92.0
+text = ""
+
 [node name="HBox" type="HBoxContainer" parent="CanvasLayer/HUD"]
 layout_mode = 0
 offset_left = 12.0
