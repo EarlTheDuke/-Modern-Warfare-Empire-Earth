@@ -95,16 +95,142 @@ func try_move_unit(u: UnitBase, dx: int, dy: int) -> bool:
     var ny: int = u.y + dy
     if nx < 0 or ny < 0 or nx >= game_map.width or ny >= game_map.height:
         return false
-    # Terrain constraint: basic parity for Army only for now
+    # Missile straight-line direction lock and hop handling
+    if u is NuclearMissile:
+        var m := u as NuclearMissile
+        if not m.has_direction:
+            if dx == 0 and dy == 0:
+                return false
+            m.direction_dx = dx
+            m.direction_dy = dy
+            m.has_direction = true
+        else:
+            if dx != m.direction_dx or dy != m.direction_dy:
+                return false
+        # Hop if blocking unit one step ahead and enough moves
+        var blocking := unit_index_at(nx, ny)
+        if blocking != -1:
+            if u.moves_left < 2:
+                return false
+            var nx2 := nx + dx
+            var ny2 := ny + dy
+            if nx2 < 0 or ny2 < 0 or nx2 >= game_map.width or ny2 >= game_map.height:
+                return false
+            if unit_index_at(nx2, ny2) != -1:
+                return false
+            u.x = nx2
+            u.y = ny2
+            u.moves_left -= 2
+            m.traveled += 2
+        else:
+            u.x = nx
+            u.y = ny
+            u.moves_left -= 1
+            m.traveled += 1
+        recompute_fow_for(current_player)
+        return true
+    # Carrier must not enter land (can_enter already enforces ocean)
     if not u.can_enter(game_map, nx, ny):
         return false
-    # Prevent stepping onto another unit (combat later)
-    if unit_index_at(nx, ny) != -1:
-        return false
+    # Combat or friendly stacking rules
+    var idx_block := unit_index_at(nx, ny)
+    if idx_block != -1:
+        var v: UnitBase = units[idx_block]
+        if v.owner == u.owner:
+            # Friendly: allow Fighter two-tile hop
+            if u is Fighter and u.moves_left >= 2:
+                var nx2 := nx + dx
+                var ny2 := ny + dy
+                if nx2 < 0 or ny2 < 0 or nx2 >= game_map.width or ny2 >= game_map.height:
+                    return false
+                if unit_index_at(nx2, ny2) != -1:
+                    return false
+                u.x = nx2
+                u.y = ny2
+                u.moves_left -= 2
+                recompute_fow_for(current_player)
+                return true
+            return false
+        # Enemy: resolve combat
+        var a_hit := 0.53
+        var d_hit := 0.52
+        # Fighter vs Army gets slight advantage
+        if u is Fighter and not (v is Fighter):
+            a_hit = 0.60
+            d_hit = 0.40
+        # City defense bonus if defender owns city under them
+        for c in game_map.cities:
+            if c["x"] == v.x and c["y"] == v.y and c["owner"] == v.owner:
+                a_hit -= 0.15
+                d_hit += 0.15
+                break
+        var res := CombatResolver.resolve_attack(u, v, a_hit, d_hit)
+        var attacker_alive: bool = res[0]
+        var defender_alive: bool = res[1]
+        if not defender_alive:
+            # remove defender (mark dead) and move in if attacker alive
+            v.hp = 0
+            if attacker_alive:
+                u.x = nx
+                u.y = ny
+                u.moves_left = max(0, u.moves_left - 1)
+                _maybe_capture_city(u)
+            recompute_fow_for(current_player)
+            return true
+        else:
+            if not attacker_alive:
+                u.hp = 0
+            recompute_fow_for(current_player)
+            return true
+    # Move into empty tile; handle city capture on arrival
     u.x = nx
     u.y = ny
     u.moves_left -= 1
+    _maybe_capture_city(u)
     recompute_fow_for(current_player)
+    return true
+
+func _maybe_capture_city(u: UnitBase) -> void:
+    for c in game_map.cities:
+        if c["x"] == u.x and c["y"] == u.y:
+            # Air units cannot capture
+            if u is Fighter:
+                return
+            if c["owner"] != u.owner:
+                c["owner"] = u.owner
+            return
+
+func can_found_city(u: UnitBase) -> bool:
+    if not (u is Army):
+        return false
+    if not u.is_alive():
+        return false
+    if game_map.tiles[u.y][u.x] != GameMap.LAND:
+        return false
+    for c in game_map.cities:
+        if c["x"] == u.x and c["y"] == u.y:
+            return false
+    if unit_index_at(u.x, u.y) != -1:
+        return false
+    return true
+
+func found_city(u: UnitBase) -> bool:
+    if not can_found_city(u):
+        return false
+    var city := {
+        "x": u.x,
+        "y": u.y,
+        "owner": u.owner,
+        "production_type": "Army",
+        "production_progress": 0,
+        "production_cost": 8,
+        "support_cap": 2,
+    }
+    game_map.cities.append(city)
+    # Remove unit (consume Army)
+    u.hp = 0
+    # Update FoW from the new city
+    recompute_fow_for(u.owner)
     return true
 
 func end_turn_and_handoff() -> void:

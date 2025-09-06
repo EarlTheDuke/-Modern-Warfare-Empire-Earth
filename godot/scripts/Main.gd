@@ -90,6 +90,12 @@ func _unhandled_input(event: InputEvent) -> void:
 				_on_generate_pressed()
 			KEY_SPACE:
 				_on_end_turn_pressed()
+			# Found city with 'F' key (align with Python hotkeys)
+			KEY_F:
+				if gs.selected_index != -1:
+					var u = gs.units[gs.selected_index]
+					if gs.found_city(u):
+						_render_all()
 			KEY_N:
 				if gs.units.size() > 0:
 					gs.selected_index = (gs.selected_index + 1) % gs.units.size()
