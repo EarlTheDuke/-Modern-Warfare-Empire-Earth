@@ -1,0 +1,13 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/Sanity.gd" id="1_kr3yq"]
+
+[node name="Sanity" type="Node2D"]
+script = ExtResource("1_kr3yq")
+
+[node name="Label" type="Label" parent="."]
+offset_left = 32.0
+offset_top = 32.0
+text = "Loading..."
+
+
