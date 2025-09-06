@@ -237,64 +237,7 @@ func _city_under_selection():
 
 
 func _spawn_initial_units() -> void:
-	# handled by GameState
 	pass
-
-func un1_reset(u) -> void:
-	u.reset_moves()
-
-func _find_first_land(start_x: int, start_y: int) -> Vector2i:
-	for radius in range(0, 10):
-		for dy in range(-radius, radius + 1):
-			for dx in range(-radius, radius + 1):
-				var x := start_x + dx
-				var y := start_y + dy
-				if x >= 0 and y >= 0 and x < game_map.width and y < game_map.height:
-					if game_map.tiles[y][x] == "+":
-						return Vector2i(x, y)
-	return Vector2i(clamp(start_x, 0, game_map.width - 1), clamp(start_y, 0, game_map.height - 1))
-
-func _find_nearby_free_land(cx: int, cy: int) -> Vector2i:
-	for radius in range(0, 8):
-		for dy in range(-radius, radius + 1):
-			for dx in range(-radius, radius + 1):
-				var x := cx + dx
-				var y := cy + dy
-				if x >= 0 and y >= 0 and x < game_map.width and y < game_map.height:
-					if game_map.tiles[y][x] == "+" and _unit_index_at(x, y) == -1:
-						return Vector2i(x, y)
-	return _find_first_land(cx, cy)
-
-func _select_next_owned() -> void:
-	if units.size() == 0:
-		selected_index = -1
-		return
-	for k in range(units.size()):
-		selected_index = (selected_index + 1) % units.size()
-		if units[selected_index].owner == current_player:
-			return
-	selected_index = -1
-
-func _reset_moves_for_next_side() -> void:
-	for u in units:
-		if u.owner != current_player:
-			u.reset_moves()
-
-func _select_first_movable() -> void:
-	for i in range(units.size()):
-		if units[i].owner == current_player and units[i].can_move():
-			selected_index = i
-			return
-	selected_index = -1
-
-func _recompute_fow() -> void:
-	game_map.clear_visible_for(current_player)
-	for c in game_map.cities:
-		if c["owner"] == current_player:
-			game_map.mark_visible_circle(current_player, c["x"], c["y"], 5)
-	for u in units:
-		if u.owner == current_player:
-			game_map.mark_visible_circle(current_player, u.x, u.y, 3)
 
 func _on_fow_mode_selected(index: int) -> void:
 	match index:
