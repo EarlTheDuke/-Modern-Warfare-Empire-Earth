@@ -52,7 +52,7 @@ func _update_hud() -> void:
 	hud_label.text = "Map: %dx%d  Cities: %d  Turn: %d  Player: %s" % [gs.game_map.width, gs.game_map.height, num_cities, gs.turn_number, gs.current_player]
 	var det := ""
 	if gs.selected_index != -1:
-		var u = gs.units[gs.selected_index]
+		var u: UnitBase = gs.units[gs.selected_index]
 		det = "%s @(%d,%d) hp:%d/%d mp:%d" % [u.owner, u.x, u.y, u.hp, u.max_hp, u.moves_left]
 		for c in gs.game_map.cities:
 			if c["x"] == u.x and c["y"] == u.y and c["owner"] == gs.current_player:
@@ -115,7 +115,7 @@ func _unhandled_input(event: InputEvent) -> void:
 			# Found city with 'F' key (align with Python hotkeys)
 			KEY_F:
 				if gs.selected_index != -1:
-					var u = gs.units[gs.selected_index]
+					var u: UnitBase = gs.units[gs.selected_index]
 					if gs.found_city(u):
 						_render_all()
 			# City production hotkeys: B set Army, R set Fighter, P cycle production
@@ -208,7 +208,7 @@ func _handle_click(pos: Vector2) -> void:
 		_render_all()
 		return
 	if gs.selected_index != -1:
-		var u = gs.units[gs.selected_index]
+		var u: UnitBase = gs.units[gs.selected_index]
 		if u.owner != gs.current_player:
 			return
 		if abs(u.x - tile_x) + abs(u.y - tile_y) == 1 and gs.game_map.tiles[tile_y][tile_x] == "+" and u.can_move():
