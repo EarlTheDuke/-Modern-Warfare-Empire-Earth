@@ -12,7 +12,7 @@ extends Node2D
 @onready var btn_load: Button = $CanvasLayer/HUD/HBox/BtnLoad
 @onready var handoff: ColorRect = $CanvasLayer/Handoff
 
-var gs: GameState
+var gs
 var awaiting_handoff: bool = false
 
 func _ready() -> void:

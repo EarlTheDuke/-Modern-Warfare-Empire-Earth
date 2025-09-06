@@ -1,5 +1,4 @@
 extends Node
-class_name GameState
 
 # Centralized game state and core helpers for Godot version
 

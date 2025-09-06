@@ -59,6 +59,9 @@ static func load_from_path(gs: GameState, path: String) -> bool:
 static func _serialize_units(units: Array) -> Array:
 	var out: Array = []
 	for u in units:
+		var hc = null
+		if typeof(u.home_city) == TYPE_VECTOR2I:
+			hc = {"x": u.home_city.x, "y": u.home_city.y}
 		var d := {
 			"class": u.get_class(),
 			"x": u.x,
@@ -68,7 +71,7 @@ static func _serialize_units(units: Array) -> Array:
 			"hp": u.hp,
 			"max_moves": u.max_moves,
 			"moves_left": u.moves_left,
-			"home_city": {"x": u.home_city.x, "y": u.home_city.y} if u.has_method("get") == false else {"x": u.home_city.x, "y": u.home_city.y},
+			"home_city": hc,
 		}
 		out.append(d)
 	return out
