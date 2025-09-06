@@ -40,7 +40,7 @@ func render_map(gm, active_player: String = "", units: Array = [], selected_inde
 			terrain.set_cell(0, Vector2i(x, y), source_id, coord)
 	# Simple sanity tile
 	terrain.set_cell(0, Vector2i(0, 0), source_id, atlas_land)
-	# Cities (owner tint handled by _draw fallback for now)
+	# Cities (owner tint handled by overlay color soon)
 	for c in gm.cities:
 		var cx: int = c["x"]
 		var cy: int = c["y"]

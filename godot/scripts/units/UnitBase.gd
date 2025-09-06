@@ -11,6 +11,9 @@ var moves_left: int = 1
 var max_hp: int = 10
 var hp: int = 10
 
+# Home city support tie (Vector2i or null)
+var home_city = null
+
 func _init(px: int, py: int, p_owner: String) -> void:
 	x = px
 	y = py

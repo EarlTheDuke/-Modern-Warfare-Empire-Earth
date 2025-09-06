@@ -8,6 +8,8 @@ extends Node2D
 @onready var fow_mode: OptionButton = $CanvasLayer/HUD/HBox/FoWMode
 @onready var btn_generate: Button = $CanvasLayer/HUD/HBox/BtnNewGame
 @onready var btn_end_turn: Button = $CanvasLayer/HUD/HBox/BtnEndTurn
+@onready var btn_save: Button = $CanvasLayer/HUD/HBox/BtnSave
+@onready var btn_load: Button = $CanvasLayer/HUD/HBox/BtnLoad
 @onready var handoff: ColorRect = $CanvasLayer/Handoff
 
 var gs: GameState
@@ -31,6 +33,8 @@ func _ready() -> void:
 	fow_mode.item_selected.connect(_on_fow_mode_selected)
 	btn_generate.pressed.connect(_on_generate_pressed)
 	btn_end_turn.pressed.connect(_on_end_turn_pressed)
+	btn_save.pressed.connect(_on_save_pressed)
+	btn_load.pressed.connect(_on_load_pressed)
 	# Camera limits: loosen to allow panning at any zoom
 	cam.limit_left = -100000
 	cam.limit_top = -100000
@@ -174,6 +178,19 @@ func _on_end_turn_pressed() -> void:
 	handoff.visible = false
 	gs.end_turn_and_handoff()
 	_render_all()
+
+func _on_save_pressed() -> void:
+	var dir := ProjectSettings.globalize_path("user://")
+	var path := dir + "/mw_ee_save.json"
+	if SaveLoad.save_to_path(gs, path):
+		print("Saved to ", path)
+
+func _on_load_pressed() -> void:
+	var dir := ProjectSettings.globalize_path("user://")
+	var path := dir + "/mw_ee_save.json"
+	if SaveLoad.load_from_path(gs, path):
+		_center_camera_on_map()
+		_render_all()
 
 func _handle_click(pos: Vector2) -> void:
 	# Convert screen coords to world using Camera2D API (handles zoom/offset)
