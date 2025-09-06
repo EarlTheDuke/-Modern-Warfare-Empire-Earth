@@ -64,7 +64,7 @@ func _update_hud() -> void:
 				det += " | City: %s ETA %d" % [str(c.get("production_type", "")), eta]
 				break
 	hud_details.text = det
-	var lines := gs.get_recent_reports(5)
+	var lines: Array[String] = gs.get_recent_reports(5)
 	hud_reports.text = "\n".join(lines)
 
 func _center_camera_on_map() -> void:
