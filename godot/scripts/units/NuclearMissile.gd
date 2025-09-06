@@ -13,7 +13,7 @@ func _init(px: int, py: int, p_owner: String) -> void:
 	hp = 1
 	super._init(px, py, p_owner)
 
-func can_enter(gm: GameMap, tx: int, ty: int) -> bool:
+func can_enter(_gm: GameMap, _tx: int, _ty: int) -> bool:
 	# Missiles can fly over any terrain
 	return true
 

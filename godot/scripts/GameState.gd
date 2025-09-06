@@ -5,10 +5,10 @@ extends Node
 @onready var rng := RandomNumberGenerator.new()
 
 # Ensure unit classes are available
-const Army = preload("res://scripts/units/Army.gd")
-const Fighter = preload("res://scripts/units/Fighter.gd")
-const Carrier = preload("res://scripts/units/Carrier.gd")
-const NuclearMissile = preload("res://scripts/units/NuclearMissile.gd")
+const ArmyScene := preload("res://scripts/units/Army.gd")
+const FighterScene := preload("res://scripts/units/Fighter.gd")
+const CarrierScene := preload("res://scripts/units/Carrier.gd")
+const NuclearMissileScene := preload("res://scripts/units/NuclearMissile.gd")
 
 # Map and players
 var game_map: GameMap
@@ -68,8 +68,8 @@ func _spawn_initial_units() -> void:
 	var b_pos := Vector2i(game_map.cities[best_b]["x"], game_map.cities[best_b]["y"])
 	var u1p := _find_nearby_free_land(a_pos.x, a_pos.y)
 	var u2p := _find_nearby_free_land(b_pos.x, b_pos.y)
-	var u1 := Army.new(u1p.x, u1p.y, players[0])
-	var u2 := Army.new(u2p.x, u2p.y, players[1])
+	var u1 := ArmyScene.new(u1p.x, u1p.y, players[0])
+	var u2 := ArmyScene.new(u2p.x, u2p.y, players[1])
 	u1.reset_moves()
 	u2.reset_moves()
 	units.append(u1)
@@ -108,8 +108,8 @@ func try_move_unit(u: UnitBase, dx: int, dy: int) -> bool:
 	if nx < 0 or ny < 0 or nx >= game_map.width or ny >= game_map.height:
 		return false
 	# Missile straight-line direction lock and hop handling
-	if u is NuclearMissile:
-		var m := u as NuclearMissile
+	if u is NuclearMissileScene:
+		var m := u as NuclearMissileScene
 		if not m.has_direction:
 			if dx == 0 and dy == 0:
 				return false
@@ -150,7 +150,7 @@ func try_move_unit(u: UnitBase, dx: int, dy: int) -> bool:
 		var v: UnitBase = units[idx_block]
 		if v.owner == u.owner:
 			# Friendly: allow Fighter two-tile hop
-			if u is Fighter and u.moves_left >= 2:
+			if u is FighterScene and u.moves_left >= 2:
 				var nx2 := nx + dx
 				var ny2 := ny + dy
 				if nx2 < 0 or ny2 < 0 or nx2 >= game_map.width or ny2 >= game_map.height:
@@ -167,7 +167,7 @@ func try_move_unit(u: UnitBase, dx: int, dy: int) -> bool:
 		var a_hit := 0.53
 		var d_hit := 0.52
 		# Fighter vs Army gets slight advantage
-		if u is Fighter and not (v is Fighter):
+		if u is FighterScene and not (v is FighterScene):
 			a_hit = 0.60
 			d_hit = 0.40
 		# City defense bonus if defender owns city under them

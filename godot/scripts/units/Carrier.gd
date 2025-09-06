@@ -8,8 +8,8 @@ func _init(px: int, py: int, p_owner: String) -> void:
 	hp = 16
 	super._init(px, py, p_owner)
 
-func can_enter(gm: GameMap, tx: int, ty: int) -> bool:
+func can_enter(gm: GameMap, tx: int, _ty: int) -> bool:
 	# Carrier must stay on ocean
-	return gm.tiles[ty][tx] == GameMap.OCEAN
+	return gm.tiles[_ty][tx] == GameMap.OCEAN
 
 
