@@ -424,9 +424,9 @@ func _enforce_fighter_basing(owner: String) -> void:
 					break
 			if not ok:
 				for d in [Vector2i(1,0),Vector2i(-1,0),Vector2i(0,1),Vector2i(0,-1),Vector2i(1,1),Vector2i(-1,-1),Vector2i(1,-1),Vector2i(-1,1)]:
-					var ax := u.x + d.x
-					var ay := u.y + d.y
-					var idxu := unit_index_at(ax, ay)
+					var ax: int = u.x + d.x
+					var ay: int = u.y + d.y
+					var idxu: int = unit_index_at(ax, ay)
 					if idxu != -1 and units[idxu] is Carrier and units[idxu].owner == owner:
 						ok = true
 						break
