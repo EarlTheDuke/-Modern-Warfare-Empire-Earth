@@ -17,6 +17,7 @@ config/features=PackedStringArray("4.4")
 [autoload]
 
 TurnManager="*res://autoload/TurnManager.gd"
+GameState="*res://scripts/GameState.gd"
 
 [dotnet]
 
