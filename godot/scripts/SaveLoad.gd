@@ -101,5 +101,3 @@ static func _deserialize_unit(d: Dictionary):
 	if typeof(hc) == TYPE_DICTIONARY:
 		u.home_city = Vector2i(int(hc.get("x", -1)), int(hc.get("y", -1)))
 	return u
-
-
