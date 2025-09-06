@@ -61,8 +61,8 @@ func _draw() -> void:
 	draw_rect(Rect2(Vector2.ZERO, Vector2(64, 64)), Color(0.1, 0.8, 0.2, 0.4), true)
 	# Debug fallback: draw first 60x40 tiles directly so we can see terrain
 	if _last_gm != null:
-		var max_y: int = min(_last_gm.height, 40)
-		var max_x: int = min(_last_gm.width, 60)
+		var max_y: int = _last_gm.height
+		var max_x: int = _last_gm.width
 		for y in range(max_y):
 			for x in range(max_x):
 				var ch: String = _last_gm.tiles[y][x]

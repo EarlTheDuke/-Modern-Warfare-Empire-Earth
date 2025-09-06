@@ -11,7 +11,7 @@ config_version=5
 [application]
 
 config/name="Modern Warfare Empire Earth"
-run/main_scene="res://scenes/Sanity.tscn"
+run/main_scene="uid://c3nw8lgqc7w03"
 config/features=PackedStringArray("4.4")
 
 [autoload]
