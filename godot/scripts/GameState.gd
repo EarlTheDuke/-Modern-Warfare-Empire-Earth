@@ -228,8 +228,10 @@ func can_found_city(u: UnitBase) -> bool:
 	for c in game_map.cities:
 		if c["x"] == u.x and c["y"] == u.y:
 			return false
-	if unit_index_at(u.x, u.y) != -1:
-		return false
+	# Allow founding on own tile; block only if another unit is stacked here
+	for v: UnitBase in units:
+		if v != u and v.is_alive() and v.x == u.x and v.y == u.y:
+			return false
 	return true
 
 func found_city(u: UnitBase) -> bool:
