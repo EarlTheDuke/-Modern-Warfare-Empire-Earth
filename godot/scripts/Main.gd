@@ -200,7 +200,7 @@ func _handle_click(pos: Vector2) -> void:
 	if tile_x < 0 or tile_y < 0 or tile_x >= gs.game_map.width or tile_y >= gs.game_map.height:
 		return
 	# Select first unit at tile, else move selected one tile if adjacent and land
-	var clicked := gs.unit_index_at(tile_x, tile_y)
+	var clicked: int = gs.unit_index_at(tile_x, tile_y)
 	if clicked != -1:
 		# Enforce side: only select current player's units
 		if gs.units[clicked].owner == gs.current_player:
