@@ -229,7 +229,7 @@ func _render_all() -> void:
 func _city_under_selection():
 	if gs.selected_index == -1:
 		return null
-	var u = gs.units[gs.selected_index]
+	var u: UnitBase = gs.units[gs.selected_index]
 	for c in gs.game_map.cities:
 		if c["x"] == u.x and c["y"] == u.y:
 			return c
