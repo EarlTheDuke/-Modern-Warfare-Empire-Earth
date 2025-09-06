@@ -96,6 +96,22 @@ func _unhandled_input(event: InputEvent) -> void:
 					var u = gs.units[gs.selected_index]
 					if gs.found_city(u):
 						_render_all()
+			# City production hotkeys: B set Army, R set Fighter, P cycle production
+			KEY_B:
+				var c = _city_under_selection()
+				if c != null and c["owner"] == gs.current_player:
+					if gs.set_city_production(c, "Army"):
+						_update_hud()
+			KEY_P:
+				var c2 = _city_under_selection()
+				if c2 != null and c2["owner"] == gs.current_player:
+					gs.cycle_city_production(c2)
+					_update_hud()
+			KEY_R:
+				var c3 = _city_under_selection()
+				if c3 != null and c3["owner"] == gs.current_player:
+					if gs.set_city_production(c3, "Fighter"):
+						_update_hud()
 			KEY_N:
 				if gs.units.size() > 0:
 					gs.selected_index = (gs.selected_index + 1) % gs.units.size()
@@ -174,6 +190,15 @@ func _try_move_selected(dx: int, dy: int) -> void:
 func _render_all() -> void:
 	map_view.render_map(gs.game_map, gs.active_player_view, gs.units, gs.selected_index)
 	_update_hud()
+
+func _city_under_selection():
+	if gs.selected_index == -1:
+		return null
+	var u = gs.units[gs.selected_index]
+	for c in gs.game_map.cities:
+		if c["x"] == u.x and c["y"] == u.y:
+			return c
+	return null
 
 
 func _spawn_initial_units() -> void:

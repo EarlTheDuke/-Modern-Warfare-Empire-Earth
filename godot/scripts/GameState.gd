@@ -234,13 +234,15 @@ func found_city(u: UnitBase) -> bool:
     return true
 
 func end_turn_and_handoff() -> void:
-    # Production, basing, victory checks will be added later
+    _advance_production_and_spawn()
+    _enforce_fighter_basing(current_player)
+    if _check_victory(current_player):
+        return
     var idx := players.find(current_player)
     if idx == -1:
         idx = 0
     current_player = players[(idx + 1) % players.size()]
     turn_number += 1
-    # Reset moves for next side
     for u: UnitBase in units:
         if u.owner == current_player:
             u.reset_moves()
@@ -267,3 +269,125 @@ func recompute_fow_for(owner: String) -> void:
             game_map.mark_visible_circle(owner, u.x, u.y, 3)
 
 
+func _advance_production_and_spawn() -> void:
+    for c in game_map.cities:
+        var owner = c.get("owner")
+        if owner == null:
+            continue
+        var cost: int = int(c.get("production_cost", 0))
+        var ptype: String = str(c.get("production_type", ""))
+        if ptype == "" or cost <= 0:
+            continue
+        c["production_progress"] = int(c.get("production_progress", 0)) + 1
+        if c["production_progress"] >= cost:
+            var placed := _try_spawn_from_city(c)
+            if placed:
+                c["production_progress"] = 0
+            else:
+                c["production_progress"] = cost
+    # Healing in owned cities
+    for u: UnitBase in units:
+        if not u.is_alive():
+            continue
+        for c in game_map.cities:
+            if c["x"] == u.x and c["y"] == u.y and c["owner"] == u.owner:
+                if u.hp < u.max_hp:
+                    u.hp = min(u.max_hp, u.hp + 1)
+                break
+
+func _try_spawn_from_city(c) -> bool:
+    var ptype: String = str(c.get("production_type", ""))
+    match ptype:
+        "Army":
+            return _spawn_army_at_city(c)
+        "Fighter":
+            return _spawn_fighter_at_city(c)
+        "Carrier":
+            return _spawn_carrier_at_city(c)
+        _:
+            return false
+
+func _spawn_army_at_city(c) -> bool:
+    var candidates := [Vector2i(c["x"], c["y"]), Vector2i(c["x"]+1,c["y"]), Vector2i(c["x"]-1,c["y"]), Vector2i(c["x"],c["y"]+1), Vector2i(c["x"],c["y"]-1)]
+    for p in candidates:
+        if p.x >= 0 and p.y >= 0 and p.x < game_map.width and p.y < game_map.height:
+            if game_map.tiles[p.y][p.x] == GameMap.LAND and unit_index_at(p.x, p.y) == -1:
+                var nu := Army.new(p.x, p.y, c["owner"])
+                nu.reset_moves()
+                units.append(nu)
+                return true
+    return false
+
+func _spawn_fighter_at_city(c) -> bool:
+    var sx := int(c["x"])
+    var sy := int(c["y"])
+    if unit_index_at(sx, sy) == -1:
+        var nu := Fighter.new(sx, sy, c["owner"])
+        nu.reset_moves()
+        units.append(nu)
+        return true
+    return false
+
+func _spawn_carrier_at_city(c) -> bool:
+    var candidates := [Vector2i(c["x"]+1,c["y"]), Vector2i(c["x"]-1,c["y"]), Vector2i(c["x"],c["y"]+1), Vector2i(c["x"],c["y"]-1)]
+    for p in candidates:
+        if p.x >= 0 and p.y >= 0 and p.x < game_map.width and p.y < game_map.height:
+            if game_map.tiles[p.y][p.x] == GameMap.OCEAN and unit_index_at(p.x, p.y) == -1:
+                var nu := Carrier.new(p.x, p.y, c["owner"])
+                nu.reset_moves()
+                units.append(nu)
+                return true
+    return false
+
+func set_city_production(c, prod_type: String) -> bool:
+    var catalog := {
+        "Army": 12,
+        "Fighter": 20,
+        "Carrier": 32,
+    }
+    if not catalog.has(prod_type):
+        return false
+    c["production_type"] = prod_type
+    c["production_cost"] = int(catalog[prod_type])
+    return true
+
+func cycle_city_production(c) -> void:
+    var options := ["Army", "Fighter", "Carrier"]
+    var idx := options.find(c.get("production_type", ""))
+    if idx == -1:
+        idx = 0
+    else:
+        idx = (idx + 1) % options.size()
+    set_city_production(c, options[idx])
+
+func _enforce_fighter_basing(owner: String) -> void:
+    for u: UnitBase in units:
+        if not u.is_alive():
+            continue
+        if u is Fighter and u.owner == owner:
+            var ok := false
+            for c in game_map.cities:
+                if c["x"] == u.x and c["y"] == u.y and c["owner"] == owner:
+                    ok = true
+                    break
+            if not ok:
+                for d in [Vector2i(1,0),Vector2i(-1,0),Vector2i(0,1),Vector2i(0,-1),Vector2i(1,1),Vector2i(-1,-1),Vector2i(1,-1),Vector2i(-1,1)]:
+                    var ax := u.x + d.x
+                    var ay := u.y + d.y
+                    var idxu := unit_index_at(ax, ay)
+                    if idxu != -1 and units[idxu] is Carrier and units[idxu].owner == owner:
+                        ok = true
+                        break
+            if not ok:
+                u.hp = 0
+
+func _check_victory(owner: String) -> bool:
+    var opponent := players[1] if owner == players[0] else players[0]
+    var opp_has := false
+    var my_has := false
+    for c in game_map.cities:
+        if c["owner"] == opponent:
+            opp_has = true
+        if c["owner"] == owner:
+            my_has = true
+    return (not opp_has) and my_has
