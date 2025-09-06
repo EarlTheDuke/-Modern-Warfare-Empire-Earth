@@ -5,6 +5,12 @@ class_name GameState
 
 @onready var rng := RandomNumberGenerator.new()
 
+# Ensure unit classes are available
+const Army = preload("res://scripts/units/Army.gd")
+const Fighter = preload("res://scripts/units/Fighter.gd")
+const Carrier = preload("res://scripts/units/Carrier.gd")
+const NuclearMissile = preload("res://scripts/units/NuclearMissile.gd")
+
 # Map and players
 var game_map: GameMap
 var players: Array[String] = ["P1", "P2"]
