@@ -238,11 +238,10 @@ func _fit_camera_to_map() -> void:
 	var map_px_h := float(gs.game_map.height * map_view.tile_size)
 	var vp := get_viewport_rect().size
 	# Compute zoom so the map exactly fits within the viewport.
-	var ratio_x := vp.x / max(1.0, map_px_w)
-	var ratio_y := vp.y / max(1.0, map_px_h)
-	var target_zoom := min(ratio_x, ratio_y)
-	# Clamp: don't zoom in beyond 1.0; apply a tiny margin so edges are visible.
-	target_zoom = min(1.0, target_zoom) * 0.98
+	# In Godot, larger zoom values show a larger area (zoom out).
+	var need_x := map_px_w / max(1.0, vp.x)
+	var need_y := map_px_h / max(1.0, vp.y)
+	var target_zoom := max(need_x, need_y) * 1.02
 	cam.zoom = Vector2(target_zoom, target_zoom)
 	_center_camera_on_map()
 
