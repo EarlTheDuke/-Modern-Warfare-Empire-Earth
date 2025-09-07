@@ -237,12 +237,12 @@ func _fit_camera_to_map() -> void:
 	var map_px_w := float(gs.game_map.width * map_view.tile_size)
 	var map_px_h := float(gs.game_map.height * map_view.tile_size)
 	var vp := get_viewport_rect().size
-	var fit_x := map_px_w / max(1.0, vp.x)
-	var fit_y := map_px_h / max(1.0, vp.y)
-	var fit := max(fit_x, fit_y)
-	# Convert fit (map/viewport ratio) to camera zoom. Zoom < 1 zooms out; > 1 zooms in.
-	# We want to always encompass the whole map: use 1/fit when fit > 1, otherwise keep 1.
-	var target_zoom := min(1.0, 1.0 / max(0.0001, fit)) * 0.98
+	# Compute zoom so the map exactly fits within the viewport.
+	var ratio_x := vp.x / max(1.0, map_px_w)
+	var ratio_y := vp.y / max(1.0, map_px_h)
+	var target_zoom := min(ratio_x, ratio_y)
+	# Clamp: don't zoom in beyond 1.0; apply a tiny margin so edges are visible.
+	target_zoom = min(1.0, target_zoom) * 0.98
 	cam.zoom = Vector2(target_zoom, target_zoom)
 	_center_camera_on_map()
 
