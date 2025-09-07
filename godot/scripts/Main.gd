@@ -19,7 +19,7 @@ func _ready() -> void:
 	print("[Main] ready")
 	# Init centralized game state
 	gs = GameState
-	var w := 240
+	var w := 160
 	var h := 96
 	gs.new_game(w, h)
 	_center_camera_on_map()
