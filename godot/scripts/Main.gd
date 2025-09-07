@@ -24,6 +24,7 @@ func _ready() -> void:
 	gs.new_game(w, h)
 	_center_camera_on_map()
 	_render_all()
+	_fit_camera_to_map()
 	# HUD setup
 	fow_mode.clear()
 	fow_mode.add_item("All")
@@ -35,6 +36,8 @@ func _ready() -> void:
 	btn_end_turn.pressed.connect(_on_end_turn_pressed)
 	btn_save.pressed.connect(_on_save_pressed)
 	btn_load.pressed.connect(_on_load_pressed)
+	# Refit camera when window resizes
+	get_window().size_changed.connect(_on_window_resized)
 	# Camera limits: loosen to allow panning at any zoom
 	cam.limit_left = -100000
 	cam.limit_top = -100000
@@ -166,6 +169,7 @@ func _on_generate_pressed() -> void:
 	gs.active_player_view = ""
 	gs.new_game(gs.game_map.width if gs.game_map else 120, gs.game_map.height if gs.game_map else 48)
 	_render_all()
+	_fit_camera_to_map()
 
 func _on_end_turn_pressed() -> void:
 	if not awaiting_handoff:
@@ -191,6 +195,7 @@ func _on_load_pressed() -> void:
 	if SaveLoad.load_from_path(gs, path):
 		_center_camera_on_map()
 		_render_all()
+		_fit_camera_to_map()
 
 func _handle_click(pos: Vector2) -> void:
 	# Convert screen coords to world using Camera2D API (handles zoom/offset)
@@ -225,6 +230,22 @@ func _try_move_selected(dx: int, dy: int) -> void:
 func _render_all() -> void:
 	map_view.render_map(gs.game_map, gs.active_player_view, gs.units, gs.selected_index)
 	_update_hud()
+
+func _fit_camera_to_map() -> void:
+	if gs == null or gs.game_map == null:
+		return
+	var map_px_w := float(gs.game_map.width * map_view.tile_size)
+	var map_px_h := float(gs.game_map.height * map_view.tile_size)
+	var vp := get_viewport_rect().size
+	var fit_x := map_px_w / max(1.0, vp.x)
+	var fit_y := map_px_h / max(1.0, vp.y)
+	var fit := max(fit_x, fit_y)
+	fit = max(1.0, fit) * 1.02
+	cam.zoom = Vector2(fit, fit)
+	_center_camera_on_map()
+
+func _on_window_resized() -> void:
+	_fit_camera_to_map()
 
 func _city_under_selection():
 	if gs.selected_index == -1:
