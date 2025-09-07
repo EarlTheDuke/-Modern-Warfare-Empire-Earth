@@ -240,8 +240,10 @@ func _fit_camera_to_map() -> void:
 	var fit_x := map_px_w / max(1.0, vp.x)
 	var fit_y := map_px_h / max(1.0, vp.y)
 	var fit := max(fit_x, fit_y)
-	fit = max(1.0, fit) * 1.02
-	cam.zoom = Vector2(fit, fit)
+	# Convert fit (map/viewport ratio) to camera zoom. Zoom < 1 zooms out; > 1 zooms in.
+	# We want to always encompass the whole map: use 1/fit when fit > 1, otherwise keep 1.
+	var target_zoom := min(1.0, 1.0 / max(0.0001, fit)) * 0.98
+	cam.zoom = Vector2(target_zoom, target_zoom)
 	_center_camera_on_map()
 
 func _on_window_resized() -> void:
